@@ -1,5 +1,7 @@
 # `pstore`
 
+[![Build Status](https://travis-ci.org/glassechidna/pstore.svg?branch=master)](https://travis-ci.org/glassechidna/pstore)
+
 `pstore` is a tiny utility to make usage of [AWS Parameter Store][aws-pstore] an
 absolute breeze. Simply prefix your application launch with `pstore exec <yourapp>`
 and you're up and running - in dev or prod.
