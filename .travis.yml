@@ -7,7 +7,7 @@ before_install:
   - go get github.com/mitchellh/gox
 
 after_success:
-  - gox -output "dist/{{.OS}}_{{.Arch}}_{{.Dir}}" -arch="amd64" -os="windows linux darwin"
+  - gox -arch="amd64" -os="windows linux darwin"
   - ls -lhR
 
 deploy:
