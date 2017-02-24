@@ -8,7 +8,7 @@ before_install:
 
 after_success:
   - gox -output "dist/{{.OS}}_{{.Arch}}_{{.Dir}}" -arch="amd64" -os="windows linux darwin"
-  - ls -lh
+  - ls -lhR
 
 deploy:
   provider: releases
