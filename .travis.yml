@@ -15,7 +15,10 @@ deploy:
   api_key:
     secure: OaJ+Tgm0LBnmSdLJi2jTkL+ggI01YDqwRBN4NsQuwbWpp2owuDB+lsbG8Xrv6+SRgwCPwCNiDbYrFrR6QGXszIXqUnOIZqABhU88SzxV5J5VdOTmbGJXgPLbQQ2vDrNcJC5gCnSW2LaAXYQM9QtdRPlKdlJOnGfHwNyUiZRThFVJrY6PsF8VSbX2fcx1nje4KE/EEPQ5yqr8UJJGhHYX/9iu4vtgGvp6qgPkrVFo3wN5dsnuWWlKE8Smd/PWrfhR/eRS73wtu6FIMija0i2Mvjw49nW+rj1TzhF9dJPIZap19k7RjC+UYXdkAbFKHuupBgZTPG3m8RG44B3dbGY4vLXjJnjqyibRzqzlrZKSwKMBefY4IcOftpEmNIaADXkhLQ8F9vvRMVt7x0FqJ1hFQWjGQU1Gln6zvQXab4jCDh6aJ9vZsydnvBuELVovPhetK7Rg19L4cPKpGDdA8jFV7zI+5vcjz19Yl01YHyGMYdN93M2Fjr1RUlCf9XZYJsX7eXbx7OAY8mqLmN4+wBBRAdZ7hGJHEEp7s0mSH20whug2ZP9iuIsKTNKC/1/uAZr3COJQ6u4/2OA4G4Wz+/huZxWP6zgEBHQ30byjNku/o2ekpFfxNmwHMd4JMCQdEnGliPEzqpjJtIsy3lN416FpDp40MvUuMwtp3Oz9tj++Daw=
   skip_cleanup: true
-  file: pstore
+  file:
+    - pstore_linux_amd64
+    - pstore_darwin_amd64
+    - pstore_windows_amd64.exe
   on:
     tags: true
     repo: glassechidna/pstore
