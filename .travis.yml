@@ -2,6 +2,11 @@ language: go
 
 go:
   - 1.x
+  
+addons:
+  apt:
+    packages:
+    - upx-ucl
 
 before_install:
   - go get github.com/mitchellh/gox
@@ -9,6 +14,7 @@ before_install:
 after_success:
   - gox -arch="amd64" -os="windows linux darwin"
   - ls -lhR
+  - upx pstore_*
 
 deploy:
   provider: releases
