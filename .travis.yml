@@ -12,7 +12,7 @@ before_install:
   - go get github.com/mitchellh/gox
 
 after_success:
-  - gox -arch="amd64" -os="windows linux darwin"
+  - CGO_ENABLED=0 gox -arch="amd64" -os="windows linux darwin"
   - ls -lhR
   - upx pstore_*
 
