@@ -12,7 +12,7 @@ before_install:
   - go get github.com/mitchellh/gox
 
 after_success:
-  - CGO_ENABLED=0 gox -arch="amd64" -os="windows linux darwin"
+  - CGO_ENABLED=0 gox -arch="amd64" -os="linux darwin"
   - ls -lhR
   - upx pstore_*
 
@@ -24,7 +24,7 @@ deploy:
   file:
     - pstore_linux_amd64
     - pstore_darwin_amd64
-    - pstore_windows_amd64.exe
+    #- pstore_windows_amd64.exe
   on:
     tags: true
     repo: glassechidna/pstore
