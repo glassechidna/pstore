@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -9,9 +8,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
 	"os"
-	"os/exec"
 	"strings"
-	"syscall"
 )
 
 const usageError = 64            // incorrect usage of "pstore"
@@ -48,7 +45,7 @@ func main() {
 				prefix := c.String("prefix")
 				verbose := c.Bool("verbose")
 				populateEnv(prefix, verbose)
-				execCommand(c.Args())
+				ExecCommand(c.Args())
 			},
 		},
 	}
@@ -109,19 +106,4 @@ func populateEnv(prefix string, verbose bool) {
 func abort(status int, message interface{}) {
 	color.New(color.FgRed).Fprintf(os.Stderr, "ERROR: %s\n", message)
 	os.Exit(status)
-}
-
-func execCommand(args []string) {
-	if len(args) == 0 {
-		abort(usageError, "no command specified")
-	}
-	commandName := args[0]
-	commandPath, err := exec.LookPath(commandName)
-	if err != nil {
-		abort(commandNotFoundError, fmt.Sprintf("cannot find '%s'", commandName))
-	}
-	err = syscall.Exec(commandPath, args, os.Environ())
-	if err != nil {
-		abort(execError, err)
-	}
 }
