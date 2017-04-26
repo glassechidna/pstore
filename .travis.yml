@@ -14,8 +14,8 @@ install:
 script: ls
 
 after_success:
-  - CGO_ENABLED=0 gox -arch="amd64" -os="windows linux darwin"
-  - upx-3.93-amd64_linux/upx pstore_{linux_amd64,windows_amd64.exe} # upx 3.93 creates buggy darwin exes, fixed in unreleased 3.94
+  - CGO_ENABLED=0 gox -arch="amd64" -os="windows linux"
+  - upx-3.93-amd64_linux/upx pstore_*
 
 deploy:
   provider: releases
@@ -24,7 +24,6 @@ deploy:
   skip_cleanup: true
   file:
     - pstore_linux_amd64
-    - pstore_darwin_amd64
     - pstore_windows_amd64.exe
   on:
     tags: true
