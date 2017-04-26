@@ -33,3 +33,17 @@ $ pstore exec --verbose <yourapp>
 ✗ Failed to decrypt PstoreVal (MYLAMESECRET)
 ERROR: Failed to decrypt some secret values
 ```
+
+## Docker
+
+`pstore` is well-suited to acting as an entrypoint for a Dockerised application.
+Adding it to your project is as simple as:
+
+```
+FROM alpine
+RUN apk add --update curl
+RUN curl -sL -o /usr/bin/pstore https://github.com/glassechidna/pstore/releases/download/1.0.3/pstore_linux_amd64
+RUN chmod 0755 /usr/bin/pstore
+ENTRYPOINT ["pstore", "exec", "--verbose", "--"]
+CMD env
+```
