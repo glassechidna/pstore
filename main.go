@@ -9,6 +9,7 @@ import (
 	"github.com/urfave/cli"
 	"os"
 	"strings"
+	"context"
 )
 
 const usageError = 64            // incorrect usage of "pstore"
@@ -77,7 +78,13 @@ func populateEnv(prefix string, verbose bool) {
 
 			names := []*string{aws.String(value)}
 			// TODO: chunk array of names into blocks of 10, pass in batches to this api call
-			resp, err := client.GetParameters(&ssm.GetParametersInput{Names: names, WithDecryption: aws.Bool(true)})
+
+			requestId := ""
+			resp, err := client.GetParametersWithContext(context.Background(), &ssm.GetParametersInput{Names: names, WithDecryption: aws.Bool(true)}, func(r *request.Request) {
+				r.Handlers.Complete.PushBack(func(req *request.Request) {
+					requestId = req.RequestID
+				})
+			})
 
 			if err != nil {
 				panic(err)
@@ -85,12 +92,12 @@ func populateEnv(prefix string, verbose bool) {
 
 			for _, param := range resp.InvalidParameters {
 				failCount++
-				color.Red("✗ Failed to decrypt %s (%s)", *param, shortName)
+				color.Red("✗ Failed to decrypt %s=%s (request ID: %s)", shortName, *param, requestId)
 			}
 
 			for _, param := range resp.Parameters {
 				if verbose {
-					color.Green("✔ Decrypted %s︎", shortName)
+					color.Green("✔ Decrypted %s︎ (request ID: %s)", shortName, requestId)
 				}
 				decrypted := param.Value
 				os.Setenv(shortName, *decrypted)
