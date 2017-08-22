@@ -10,6 +10,9 @@ and you're up and running - in dev or prod.
 
 ## Usage
 
+`pstore` expects the `AWS_REGION` environment variable to be set to the region
+that your parameters are stored in.
+
 `pstore` is usable out of the box. By default it looks for environment variables
 with a `PSTORE_` prefix. For example, `PSTORE_DBSTRING=MyDatabaseString` asks
 AWS to decrypt the parameter named **MyDatabaseString** and stores the decrypted
