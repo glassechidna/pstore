@@ -14,7 +14,7 @@ install:
 script: ls
 
 after_success:
-  - CGO_ENABLED=0 gox -arch="amd64" -os="windows linux"
+  - CGO_ENABLED=0 gox -arch="amd64" -os="windows linux" -ldflags="-X main.ApplicationVersion=$(git describe --tags)"
   - upx-3.93-amd64_linux/upx pstore_*
 
 deploy:

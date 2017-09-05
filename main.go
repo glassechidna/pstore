@@ -18,13 +18,13 @@ const execError = 126            // cannot execute the specified command
 const commandNotFoundError = 127 // cannot find the specified command
 
 const appName = "pstore"
-const appVersion = "1.0.0"
+var ApplicationVersion = "devel"
 
 func main() {
 
 	app := cli.NewApp()
 	app.Name = appName
-	app.Version = appVersion
+	app.Version = ApplicationVersion
 	app.Usage = "AWS SSM Parameter Store command shim"
 
 	app.Commands = []cli.Command{
@@ -57,7 +57,7 @@ func main() {
 
 var userAgentHandler = request.NamedHandler{
 	Name: "pstore.UserAgentHandler",
-	Fn:   request.MakeAddToUserAgentHandler(appName, appVersion),
+	Fn:   request.MakeAddToUserAgentHandler(appName, ApplicationVersion),
 }
 
 func populateEnv(prefix string, verbose bool) {
