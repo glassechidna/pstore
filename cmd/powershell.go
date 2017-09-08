@@ -44,7 +44,7 @@ to quickly create a Cobra application.`,
 func doPowershell(simplePrefix, tagPrefix string, verbose bool) {
 	common.Doit(simplePrefix, tagPrefix, verbose, func(key, val string) {
 		escaped := strings.Replace(val, "\"", "\\\"", -1)
-		fmt.Printf("$Env:%s=\"%s\"\n", key, escaped)
+		fmt.Printf("${Env:%s}=\"%s\"\n", key, escaped)
 	})
 }
 
