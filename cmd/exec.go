@@ -53,4 +53,6 @@ func init() {
 	execCmd.PersistentFlags().String("prefix", "PSTORE_", "")
 	execCmd.PersistentFlags().String("tag-prefix", "PSTORETAG_", "")
 	execCmd.PersistentFlags().Bool("verbose", false, "")
+	
+	viper.BindPFlags(execCmd.PersistentFlags())
 }
