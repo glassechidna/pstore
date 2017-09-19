@@ -49,10 +49,4 @@ func doExec(simplePrefix, tagPrefix string, verbose bool, args []string) {
 
 func init() {
 	RootCmd.AddCommand(execCmd)
-
-	execCmd.PersistentFlags().String("prefix", "PSTORE_", "")
-	execCmd.PersistentFlags().String("tag-prefix", "PSTORETAG_", "")
-	execCmd.PersistentFlags().Bool("verbose", false, "")
-	
-	viper.BindPFlags(execCmd.PersistentFlags())
 }
