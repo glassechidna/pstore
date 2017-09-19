@@ -10,6 +10,9 @@ import (
 	"strings"
 	"context"
 	"github.com/aws/aws-sdk-go/service/resourcegroupstaggingapi"
+	"github.com/aws/aws-sdk-go/aws/ec2metadata"
+	"net/http"
+	"time"
 )
 
 const usageError = 64            // incorrect usage of "pstore"
@@ -98,12 +101,6 @@ type ParamResult struct {
 	Success bool
 }
 
-func PopulateEnv(params []ParamResult)  {
-	for _, param := range params {
-		os.Setenv(param.EnvName, param.Value)
-	}
-}
-
 func GetParamsByNames(sess *session.Session, input map[string]string) []ParamResult {
 	api2 := ssm.New(sess)
 	results := []ParamResult{}
@@ -184,11 +181,36 @@ func printErrors(params []ParamResult, verbose bool) bool {
 	return !anyFailed
 }
 
+func awsRegion() string {
+	config := aws.NewConfig().
+		WithHTTPClient(&http.Client{Timeout: 2 * time.Second}).
+		WithMaxRetries(1)
+
+	meta := ec2metadata.New(session.Must(session.NewSession(config)))
+	region := os.Getenv("AWS_REGION")
+
+	if meta.Available() {
+		regionp, err := meta.Region()
+		if err == nil {
+			region = regionp
+		}
+	}
+
+	return region
+}
+
 func Doit(simplePrefix, tagPrefix string, verbose bool, callback func(key, value string)) {
-	sess, _ := session.NewSession()
+	req := GetParamRequestFromEnv(simplePrefix, tagPrefix)
+	if len(req.TaggedParams) + len(req.SimpleParams) == 0 { return }
+
+	region := awsRegion()
+	if len(region) == 0 {
+		abort(usageError, "No AWS region specified. Either run on EC2 or specify AWS_REGION env var")
+	}
+
+	sess, _ := session.NewSession(aws.NewConfig().WithRegion(region))
 	sess.Handlers.Build.PushBackNamed(userAgentHandler)
 
-	req := GetParamRequestFromEnv(simplePrefix, tagPrefix)
 	results := GetParamsByNames(sess, req.SimpleParams)
 
 	for key, val := range req.TaggedParams {
