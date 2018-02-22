@@ -49,6 +49,7 @@ func init() {
 
 	RootCmd.PersistentFlags().String("prefix", "PSTORE_", "")
 	RootCmd.PersistentFlags().String("tag-prefix", "PSTORETAG_", "")
+	RootCmd.PersistentFlags().String("path-prefix", "PSTOREPATH_", "")
 	RootCmd.PersistentFlags().Bool("verbose", false, "")
 
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.pstore.yaml)")

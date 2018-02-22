@@ -138,12 +138,49 @@ func GetParamsByNames(sess *session.Session, input map[string]string) []ParamRes
 	return results
 }
 
+func GetParamsByPaths(sess *session.Session, input []string) []ParamResult {
+	results := []ParamResult{}
+	api := ssm.New(sess)
+	requestId := ""
+
+	for _, path := range input {
+		resp, err := api.GetParametersByPathWithContext(context.Background(), &ssm.GetParametersByPathInput{
+			Path: &path,
+			Recursive: aws.Bool(false),
+		}, func(r *request.Request) {
+			r.Handlers.Complete.PushBack(func(req *request.Request) {
+				requestId = req.RequestID
+			})
+		})
+
+
+		for _, param := range resp.Parameters {
+			parts := strings.Split(*param.Name, "/")
+			name := parts[len(parts)-1]
+			if err == nil {
+				results = append(results, ParamResult{
+					ParamName: "",
+					EnvName: name,
+					Value: *param.Value,
+					RequestId: requestId,
+					Success: true,
+				})
+			}
+		}
+
+	}
+
+	return results
+}
+
+
 type ParamsRequest struct {
 	SimpleParams map[string]string
 	TaggedParams map[string]string
+	PathParams   []string
 }
 
-func GetParamRequestFromEnv(simplePrefix, tagPrefix string) ParamsRequest {
+func GetParamRequestFromEnv(simplePrefix, tagPrefix, pathPrefix string) ParamsRequest {
 	req := ParamsRequest{
 		SimpleParams: make(map[string]string),
 		TaggedParams: make(map[string]string),
@@ -160,6 +197,8 @@ func GetParamRequestFromEnv(simplePrefix, tagPrefix string) ParamsRequest {
 		} else if strings.HasPrefix(name, tagPrefix) {
 			shortName := name[len(tagPrefix):]
 			req.TaggedParams[shortName] = value
+		} else if strings.HasPrefix(name, pathPrefix) {
+			req.PathParams = append(req.PathParams, value)
 		}
 	}
 
@@ -199,9 +238,9 @@ func awsRegion() string {
 	return region
 }
 
-func Doit(simplePrefix, tagPrefix string, verbose bool, callback func(key, value string)) {
-	req := GetParamRequestFromEnv(simplePrefix, tagPrefix)
-	if len(req.TaggedParams) + len(req.SimpleParams) == 0 { return }
+func Doit(simplePrefix, tagPrefix, pathPrefix string, verbose bool, callback func(key, value string)) {
+	req := GetParamRequestFromEnv(simplePrefix, tagPrefix, pathPrefix)
+	if len(req.TaggedParams) + len(req.SimpleParams) + len(req.PathParams) == 0 { return }
 
 	region := awsRegion()
 	if len(region) == 0 {
@@ -212,6 +251,8 @@ func Doit(simplePrefix, tagPrefix string, verbose bool, callback func(key, value
 	sess.Handlers.Build.PushBackNamed(userAgentHandler)
 
 	results := GetParamsByNames(sess, req.SimpleParams)
+
+	results = append(results, GetParamsByPaths(sess, req.PathParams)...)
 
 	for key, val := range req.TaggedParams {
 		results = append(results, GetParametersByTag(sess, key, val)...)

@@ -35,14 +35,15 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		simplePrefix := viper.GetString("prefix")
 		tagPrefix := viper.GetString("tag-prefix")
+		pathPrefix := viper.GetString("path-prefix")
 		verbose := viper.GetBool("verbose")
 
-		doPowershell(simplePrefix, tagPrefix, verbose)
+		doPowershell(simplePrefix, tagPrefix, pathPrefix, verbose)
 	},
 }
 
-func doPowershell(simplePrefix, tagPrefix string, verbose bool) {
-	common.Doit(simplePrefix, tagPrefix, verbose, func(key, val string) {
+func doPowershell(simplePrefix, tagPrefix, pathPrefix string, verbose bool) {
+	common.Doit(simplePrefix, tagPrefix, pathPrefix, verbose, func(key, val string) {
 		escaped := strings.Replace(val, "\"", "\\\"", -1)
 		fmt.Printf("${Env:%s}=\"%s\"\n", key, escaped)
 	})
