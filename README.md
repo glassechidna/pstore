@@ -86,7 +86,7 @@ Adding it to your project is as simple as:
 ```
 FROM alpine
 RUN apk add --update curl
-RUN curl -sL -o /usr/bin/pstore https://github.com/glassechidna/pstore/releases/download/1.2.0/pstore_linux_amd64
+RUN curl -sL -o /usr/bin/pstore https://github.com/glassechidna/pstore/releases/download/1.4.0/pstore_linux_amd64
 RUN chmod 0755 /usr/bin/pstore
 ENTRYPOINT ["pstore", "exec", "--verbose", "--"]
 CMD env
