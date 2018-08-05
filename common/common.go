@@ -147,7 +147,7 @@ func GetParamsByPaths(sess *session.Session, input []string) []ParamResult {
 		resp, err := api.GetParametersByPathWithContext(context.Background(), &ssm.GetParametersByPathInput{
 			Path: &path,
 			Recursive: aws.Bool(false),
-			WithDecryption: aws.Bool(true)
+			WithDecryption: aws.Bool(true),
 		}, func(r *request.Request) {
 			r.Handlers.Complete.PushBack(func(req *request.Request) {
 				requestId = req.RequestID
