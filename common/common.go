@@ -6,13 +6,15 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ssm"
 	"github.com/fatih/color"
+
+	"context"
+	"net/http"
 	"os"
 	"strings"
-	"context"
-	"github.com/aws/aws-sdk-go/service/resourcegroupstaggingapi"
-	"github.com/aws/aws-sdk-go/aws/ec2metadata"
-	"net/http"
 	"time"
+
+	"github.com/aws/aws-sdk-go/aws/ec2metadata"
+	"github.com/aws/aws-sdk-go/service/resourcegroupstaggingapi"
 )
 
 const usageError = 64            // incorrect usage of "pstore"
@@ -21,6 +23,7 @@ const execError = 126            // cannot execute the specified command
 const commandNotFoundError = 127 // cannot find the specified command
 
 const appName = "pstore"
+
 var ApplicationVersion = "devel"
 
 var userAgentHandler = request.NamedHandler{
@@ -56,12 +59,14 @@ func GetParametersByTag(sess *session.Session, key, value string) []ParamResult 
 		name := split[1]
 		envName := TagValueWithKey(r.Tags, "pstore:name")
 
-		if envName == nil { continue } // TODO: maybe emit logs
+		if envName == nil {
+			continue
+		} // TODO: maybe emit logs
 
 		requestId := ""
 		input := &ssm.GetParametersInput{Names: aws.StringSlice([]string{name}), WithDecryption: aws.Bool(true)}
 
-		resp, _ := api2.GetParametersWithContext(context.Background(), input, func(r *request.Request) {
+		resp, err := api2.GetParametersWithContext(context.Background(), input, func(r *request.Request) {
 			r.Handlers.Complete.PushBack(func(req *request.Request) {
 				requestId = req.RequestID
 			})
@@ -70,10 +75,11 @@ func GetParametersByTag(sess *session.Session, key, value string) []ParamResult 
 		for _, p := range resp.Parameters {
 			result := ParamResult{
 				ParamName: *p.Name,
-				EnvName: *envName,
-				Value: *p.Value,
-				RequestId: requestId,
-				Success: true,
+				EnvName:   *envName,
+				Value:     *p.Value,
+				RequestID: requestId,
+				Success:   true,
+				Err:       err,
 			}
 			results = append(results, result)
 		}
@@ -81,9 +87,10 @@ func GetParametersByTag(sess *session.Session, key, value string) []ParamResult 
 		for _, name := range resp.InvalidParameters {
 			result := ParamResult{
 				ParamName: *name,
-				EnvName: *envName,
-				RequestId: requestId,
-				Success: false,
+				EnvName:   *envName,
+				RequestID: requestId,
+				Success:   false,
+				Err:       err,
 			}
 			results = append(results, result)
 		}
@@ -95,10 +102,11 @@ func GetParametersByTag(sess *session.Session, key, value string) []ParamResult 
 
 type ParamResult struct {
 	ParamName string
-	EnvName string
-	Value string
-	RequestId string
-	Success bool
+	EnvName   string
+	Value     string
+	RequestID string
+	Success   bool
+	Err       error
 }
 
 func GetParamsByNames(sess *session.Session, input map[string]string) []ParamResult {
@@ -106,12 +114,12 @@ func GetParamsByNames(sess *session.Session, input map[string]string) []ParamRes
 	results := []ParamResult{}
 
 	for envName, paramName := range input {
-		requestId := ""
+		requestID := ""
 
 		input := &ssm.GetParameterInput{Name: &paramName, WithDecryption: aws.Bool(true)}
 		resp, err := api2.GetParameterWithContext(context.Background(), input, func(r *request.Request) {
 			r.Handlers.Complete.PushBack(func(req *request.Request) {
-				requestId = req.RequestID
+				requestID = req.RequestID
 			})
 		})
 
@@ -120,16 +128,18 @@ func GetParamsByNames(sess *session.Session, input map[string]string) []ParamRes
 				ParamName: paramName,
 				EnvName:   envName,
 				Value:     *resp.Parameter.Value,
-				RequestId: requestId,
+				RequestID: requestID,
 				Success:   true,
+				Err:       nil,
 			}
 			results = append(results, result)
 		} else {
 			result := ParamResult{
 				ParamName: paramName,
-				EnvName: envName,
-				RequestId: requestId,
-				Success: false,
+				EnvName:   envName,
+				RequestID: requestID,
+				Success:   false,
+				Err:       err,
 			}
 			results = append(results, result)
 		}
@@ -141,18 +151,17 @@ func GetParamsByNames(sess *session.Session, input map[string]string) []ParamRes
 func GetParamsByPaths(sess *session.Session, input []string) []ParamResult {
 	results := []ParamResult{}
 	api := ssm.New(sess)
-	requestId := ""
+	requestID := ""
 
 	for _, path := range input {
 		resp, err := api.GetParametersByPathWithContext(context.Background(), &ssm.GetParametersByPathInput{
-			Path: &path,
+			Path:      &path,
 			Recursive: aws.Bool(false),
 		}, func(r *request.Request) {
 			r.Handlers.Complete.PushBack(func(req *request.Request) {
-				requestId = req.RequestID
+				requestID = req.RequestID
 			})
 		})
-
 
 		for _, param := range resp.Parameters {
 			parts := strings.Split(*param.Name, "/")
@@ -160,10 +169,11 @@ func GetParamsByPaths(sess *session.Session, input []string) []ParamResult {
 			if err == nil {
 				results = append(results, ParamResult{
 					ParamName: "",
-					EnvName: name,
-					Value: *param.Value,
-					RequestId: requestId,
-					Success: true,
+					EnvName:   name,
+					Value:     *param.Value,
+					RequestID: requestID,
+					Success:   true,
+					Err:       nil,
 				})
 			}
 		}
@@ -172,7 +182,6 @@ func GetParamsByPaths(sess *session.Session, input []string) []ParamResult {
 
 	return results
 }
-
 
 type ParamsRequest struct {
 	SimpleParams map[string]string
@@ -210,10 +219,13 @@ func printErrors(params []ParamResult, verbose bool) bool {
 
 	for _, param := range params {
 		if !param.Success {
-			color.Red("✗ Failed to decrypt %s=%s (request ID: %s)", param.ParamName, param.EnvName, param.RequestId)
+			color.Red("✗ Failed to decrypt %s=%s (request ID: %s)", param.ParamName, param.EnvName, param.RequestID)
+			if param.Err != nil {
+				color.Red("Failed Reason: %s", param.Err.Error())
+			}
 			anyFailed = true
 		} else if verbose {
-			color.Green("✔ Decrypted %s︎=%s (request ID: %s)",  param.ParamName, param.EnvName, param.RequestId)
+			color.Green("✔ Decrypted %s︎=%s (request ID: %s)", param.ParamName, param.EnvName, param.RequestID)
 		}
 	}
 
@@ -240,7 +252,9 @@ func awsRegion() string {
 
 func Doit(simplePrefix, tagPrefix, pathPrefix string, verbose bool, callback func(key, value string)) {
 	req := GetParamRequestFromEnv(simplePrefix, tagPrefix, pathPrefix)
-	if len(req.TaggedParams) + len(req.SimpleParams) + len(req.PathParams) == 0 { return }
+	if len(req.TaggedParams)+len(req.SimpleParams)+len(req.PathParams) == 0 {
+		return
+	}
 
 	region := awsRegion()
 	if len(region) == 0 {
