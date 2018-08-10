@@ -15,21 +15,20 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/glassechidna/pstore/common"
 	"os"
+
+	"github.com/glassechidna/pstore/common"
+	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var execCmd = &cobra.Command{
 	Use:   "exec",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "exec will seed the current environment with ssm parameters (if it exists) execute a command",
+	Long: `example:
+	AWS_REGION=us-east-1 PSTORE_DBSTRING=MyDatabaseString pstore exec -- 'echo val is $DBSTRING'
+	val is SomeSuperSecretDbString`,
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		simplePrefix := viper.GetString("prefix")
 		tagPrefix := viper.GetString("tag-prefix")

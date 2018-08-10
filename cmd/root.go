@@ -26,13 +26,10 @@ var cfgFile string
 
 var RootCmd = &cobra.Command{
 	Use:   "pstore",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+	Short: "pstore is a tiny utility to make usage of AWS Parameter Store an absolute breeze. Simply prefix your application launch with pstore exec <yourapp> and you're up and running - in dev or prod.",
+	Long: `pstore is usable out of the box. By default it looks for environment variables with a PSTORE_ prefix. For example, PSTORE_DBSTRING=MyDatabaseString asks AWS to decrypt the parameter named MyDatabaseString and stores the decrypted value in a new environment variable named DBSTRING. If there are no envvars with the PSTORE_ prefix, it's essentially a noop - so the same command can be used in local dev and in prod.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	If pstore fails to decrypt any envvars it will exit instead of launching your application.`,
 }
 
 // Execute adds all child commands to the root command sets flags appropriately.
@@ -64,8 +61,8 @@ func initConfig() {
 	}
 
 	viper.SetConfigName(".pstore") // name of config file (without extension)
-	viper.AddConfigPath("$HOME")  // adding home directory as first search path
-	viper.AutomaticEnv()          // read in environment variables that match
+	viper.AddConfigPath("$HOME")   // adding home directory as first search path
+	viper.AutomaticEnv()           // read in environment variables that match
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
