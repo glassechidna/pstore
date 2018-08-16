@@ -5,16 +5,14 @@ go:
   
 install:
   - go get github.com/mitchellh/gox
-  - curl -sL -o glide.tgz https://github.com/Masterminds/glide/releases/download/v0.12.3/glide-v0.12.3-linux-amd64.tar.gz
-  - tar -xvf glide.tgz
-  - linux-amd64/glide install
+  - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+  - dep ensure
   - curl -sL -o upx.txz https://github.com/upx/upx/releases/download/v3.94/upx-3.94-amd64_linux.tar.xz
   - tar -xvf upx.txz
 
-script: ls
+script: CGO_ENABLED=0 gox -arch="amd64" -os="windows darwin linux" -ldflags="-X main.ApplicationVersion=$(git describe --tags)"
 
 after_success:
-  - CGO_ENABLED=0 gox -arch="amd64" -os="windows darwin linux" -ldflags="-X main.ApplicationVersion=$(git describe --tags)"
   - upx-3.94-amd64_linux/upx pstore_*
 
 deploy:
