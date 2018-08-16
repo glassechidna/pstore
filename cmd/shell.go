@@ -17,21 +17,21 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
-	"github.com/glassechidna/pstore/common"
-	"github.com/spf13/viper"
 	"strings"
+
+	"github.com/glassechidna/pstore/common"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var shellCmd = &cobra.Command{
 	Use:   "shell",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "shell will seed your session with environment with the ssm parameters, and will not execute a child process",
+	Long: `Example:
+	#!/bin/bash
+	# do some stuff ...
+	eval $(PSTORE_DBSTRING=MyDatabaseString pstore shell)
+	echo $DBSTRING # will echo out your secret string!`,
 	Run: func(cmd *cobra.Command, args []string) {
 		simplePrefix := viper.GetString("prefix")
 		tagPrefix := viper.GetString("tag-prefix")

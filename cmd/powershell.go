@@ -17,21 +17,22 @@ package cmd
 import (
 	"fmt"
 
+	"strings"
+
+	"github.com/glassechidna/pstore/common"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"strings"
-	"github.com/glassechidna/pstore/common"
 )
 
 var powershellCmd = &cobra.Command{
 	Use:   "powershell",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "same as shell but for windows",
+	Long: `Example:
+	$Env:PSTORE_DBSTRING = "MyDatabaseString"
+	$Cmd = (pstore powershell mycompany-prod) | Out-String
+	Invoke-Expression $Cmd
+	Do-SomethingWith -DbString $DBSTRING
+	`,
 	Run: func(cmd *cobra.Command, args []string) {
 		simplePrefix := viper.GetString("prefix")
 		tagPrefix := viper.GetString("tag-prefix")
