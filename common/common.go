@@ -25,6 +25,7 @@ const commandNotFoundError = 127 // cannot find the specified command
 const appName = "pstore"
 
 var ApplicationVersion = "devel"
+var ApplicationBuildDate = "unknown"
 
 var userAgentHandler = request.NamedHandler{
 	Name: "pstore.UserAgentHandler",

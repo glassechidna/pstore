@@ -10,7 +10,7 @@ install:
   - curl -sL -o upx.txz https://github.com/upx/upx/releases/download/v3.94/upx-3.94-amd64_linux.tar.xz
   - tar -xvf upx.txz
 
-script: CGO_ENABLED=0 gox -arch="amd64" -os="windows darwin linux" -ldflags="-X main.ApplicationVersion=$(git describe --tags)"
+script: CGO_ENABLED=0 gox -arch="amd64" -os="windows darwin linux" -ldflags="-X github.com/glassechidna/pstore/common.ApplicationVersion=$(git describe --tags) -X github.com/glassechidna/pstore/common.ApplicationBuildDate= $(date +%FT%T%z)"
 
 after_success:
   - upx-3.94-amd64_linux/upx pstore_*
