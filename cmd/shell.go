@@ -19,9 +19,9 @@ import (
 
 	"strings"
 
-	"github.com/glassechidna/pstore/common"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/glassechidna/pstore/pkg/pstore"
 )
 
 var shellCmd = &cobra.Command{
@@ -43,7 +43,7 @@ var shellCmd = &cobra.Command{
 }
 
 func doShell(simplePrefix, tagPrefix, pathPrefix string, verbose bool) {
-	common.Doit(simplePrefix, tagPrefix, pathPrefix, verbose, func(key, val string) {
+	pstore.Doit(simplePrefix, tagPrefix, pathPrefix, verbose, func(key, val string) {
 		escaped := strings.Replace(val, "'", "\\'", -1)
 		fmt.Printf("export %s='%s'\n", key, escaped)
 	})

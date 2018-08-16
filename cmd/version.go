@@ -17,14 +17,14 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"fmt"
-	"github.com/glassechidna/pstore/common"
+	"github.com/glassechidna/pstore/pkg/pstore"
 )
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Emits pstore version number and build date",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Version: %s\nBuild Date: %s\n", common.ApplicationVersion, common.ApplicationBuildDate)
+		fmt.Printf("Version: %s\nBuild Date: %s\n", pstore.ApplicationVersion, pstore.ApplicationBuildDate)
 	},
 }
 

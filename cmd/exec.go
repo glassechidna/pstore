@@ -17,9 +17,9 @@ package cmd
 import (
 	"os"
 
-	"github.com/glassechidna/pstore/common"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/glassechidna/pstore/pkg/pstore"
 )
 
 var execCmd = &cobra.Command{
@@ -40,11 +40,11 @@ var execCmd = &cobra.Command{
 }
 
 func doExec(simplePrefix, tagPrefix, pathPrefix string, verbose bool, args []string) {
-	common.Doit(simplePrefix, tagPrefix, pathPrefix, verbose, func(key, val string) {
+	pstore.Doit(simplePrefix, tagPrefix, pathPrefix, verbose, func(key, val string) {
 		os.Setenv(key, val)
 	})
 
-	common.ExecCommand(args)
+	pstore.ExecCommand(args)
 }
 
 func init() {
