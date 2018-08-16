@@ -15,9 +15,9 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"fmt"
 	"github.com/glassechidna/pstore/pkg/pstore"
+	"github.com/spf13/cobra"
 )
 
 var versionCmd = &cobra.Command{

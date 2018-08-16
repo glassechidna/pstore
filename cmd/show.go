@@ -17,13 +17,13 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
+	"encoding/json"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ssm"
-	"github.com/aws/aws-sdk-go/aws"
-	"sort"
 	"github.com/fatih/color"
-	"encoding/json"
+	"github.com/spf13/cobra"
+	"sort"
 )
 
 var showCmd = &cobra.Command{
@@ -46,8 +46,8 @@ func getAllParameters(sess *session.Session, path string) []*ssm.Parameter {
 	params := []*ssm.Parameter{}
 
 	api.GetParametersByPathPages(&ssm.GetParametersByPathInput{
-		Path: &path,
-		Recursive: aws.Bool(true),
+		Path:           &path,
+		Recursive:      aws.Bool(true),
 		WithDecryption: aws.Bool(true),
 	}, func(page *ssm.GetParametersByPathOutput, lastPage bool) bool {
 		params = append(params, page.Parameters...)
@@ -115,7 +115,9 @@ func longestName(params []*ssm.Parameter) int {
 
 	for _, param := range params {
 		plen := len(faint("%s", *param.Name))
-		if plen > longest { longest = plen }
+		if plen > longest {
+			longest = plen
+		}
 	}
 
 	return longest

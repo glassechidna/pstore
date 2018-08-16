@@ -19,9 +19,9 @@ import (
 
 	"strings"
 
+	"github.com/glassechidna/pstore/pkg/pstore"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/glassechidna/pstore/pkg/pstore"
 )
 
 var shellCmd = &cobra.Command{

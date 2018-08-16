@@ -156,8 +156,8 @@ func GetParamsByPaths(sess *session.Session, input []string) []ParamResult {
 
 	for _, path := range input {
 		resp, err := api.GetParametersByPathWithContext(context.Background(), &ssm.GetParametersByPathInput{
-			Path:      &path,
-			Recursive: aws.Bool(false),
+			Path:           &path,
+			Recursive:      aws.Bool(false),
 			WithDecryption: aws.Bool(true),
 		}, func(r *request.Request) {
 			r.Handlers.Complete.PushBack(func(req *request.Request) {

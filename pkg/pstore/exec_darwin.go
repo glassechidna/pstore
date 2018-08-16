@@ -1,9 +1,9 @@
 package pstore
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
-	"fmt"
 	"syscall"
 )
 

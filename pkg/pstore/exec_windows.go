@@ -1,9 +1,9 @@
 package pstore
 
 import (
-	"os/exec"
-	"os"
 	"fmt"
+	"os"
+	"os/exec"
 )
 
 func ExecCommand(args []string) {
