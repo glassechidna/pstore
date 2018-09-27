@@ -91,3 +91,5 @@ RUN chmod +x /usr/bin/pstore
 ENTRYPOINT ["pstore", "exec", "--verbose", "--"]
 CMD env
 ```
+
+Note that https requests made require `ca-certificates`. Alpine does not ship them by default anymore. In the above example this package is installed because `curl` also needs them, but if you install without `curl` or your `Dockerfile` removes `curl`, you need to explicitly have `RUN apk add ca-certificates`. Without these you will get a runtime error `x509: failed to load system roots and no roots provided`.
