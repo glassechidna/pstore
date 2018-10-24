@@ -1,20 +1,19 @@
 package pstore
 
 import (
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/request"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ssm"
-	"github.com/fatih/color"
-
 	"context"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
+	"github.com/aws/aws-sdk-go/aws/request"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/resourcegroupstaggingapi"
+	"github.com/aws/aws-sdk-go/service/ssm"
+	"github.com/fatih/color"
 )
 
 const usageError = 64            // incorrect usage of "pstore"
@@ -155,7 +154,7 @@ func GetParamsByPaths(sess *session.Session, input []string) []ParamResult {
 	requestID := ""
 
 	for _, path := range input {
-		resp, err := api.GetParametersByPathWithContext(context.Background(), &ssm.GetParametersByPathInput{
+		resp, err := api.GetParametersByPathPagesWithContext(context.Background(), &ssm.GetParametersByPathInput{
 			Path:           &path,
 			Recursive:      aws.Bool(true),
 			WithDecryption: aws.Bool(true),
