@@ -152,27 +152,30 @@ func GetParamsByPaths(sess *session.Session, input []string) []ParamResult {
 	results := []ParamResult{}
 	api := ssm.New(sess)
 	requestID := ""
-
 	for _, path := range input {
-		resp, err := api.GetParametersByPathPagesWithContext(context.Background(), &ssm.GetParametersByPathInput{
+		input := &ssm.GetParametersByPathInput{
 			Path:           &path,
 			Recursive:      aws.Bool(true),
 			WithDecryption: aws.Bool(true),
-		}, func(page *ssm.GetParametersByPathOutput, lastPage bool) bool {
-			for _, param := range page.Parameters {
-				parts := strings.Split(*param.Name, "/")
-				name := parts[len(parts)-1]
-				results = append(results, ParamResult{
-					ParamName: "",
-					EnvName:   name,
-					Value:     *param.Value,
-					RequestID: requestID,
-					Success:   true,
-					Err:       nil,
-				})
-			}
-			return !lastPage
-		},
+		}
+		api.GetParametersByPathPagesWithContext(
+			context.Background(),
+			input,
+			func(page *ssm.GetParametersByPathOutput, lastPage bool) bool {
+				for _, param := range page.Parameters {
+					parts := strings.Split(*param.Name, "/")
+					name := parts[len(parts)-1]
+					results = append(results, ParamResult{
+						ParamName: "",
+						EnvName:   name,
+						Value:     *param.Value,
+						RequestID: requestID,
+						Success:   true,
+						Err:       nil,
+					})
+				}
+				return !lastPage
+			},
 			func(r *request.Request) {
 				r.Handlers.Complete.PushBack(func(req *request.Request) {
 					requestID = req.RequestID
