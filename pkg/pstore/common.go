@@ -157,18 +157,12 @@ func GetParamsByPaths(sess *session.Session, input []string) []ParamResult {
 	for _, path := range input {
 		resp, err := api.GetParametersByPathWithContext(context.Background(), &ssm.GetParametersByPathInput{
 			Path:           &path,
-			Recursive:      aws.Bool(false),
+			Recursive:      aws.Bool(true),
 			WithDecryption: aws.Bool(true),
-		}, func(r *request.Request) {
-			r.Handlers.Complete.PushBack(func(req *request.Request) {
-				requestID = req.RequestID
-			})
-		})
-
-		for _, param := range resp.Parameters {
-			parts := strings.Split(*param.Name, "/")
-			name := parts[len(parts)-1]
-			if err == nil {
+		}, func(page *ssm.GetParametersByPathOutput, lastPage bool) bool {
+			for _, param := range page.Parameters {
+				parts := strings.Split(*param.Name, "/")
+				name := parts[len(parts)-1]
 				results = append(results, ParamResult{
 					ParamName: "",
 					EnvName:   name,
@@ -178,8 +172,14 @@ func GetParamsByPaths(sess *session.Session, input []string) []ParamResult {
 					Err:       nil,
 				})
 			}
-		}
+			return !lastPage
+		},
+			func(r *request.Request) {
+				r.Handlers.Complete.PushBack(func(req *request.Request) {
+					requestID = req.RequestID
+				})
 
+			})
 	}
 
 	return results
