@@ -1,20 +1,19 @@
 package pstore
 
 import (
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/request"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ssm"
-	"github.com/fatih/color"
-
 	"context"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
+	"github.com/aws/aws-sdk-go/aws/request"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/resourcegroupstaggingapi"
+	"github.com/aws/aws-sdk-go/service/ssm"
+	"github.com/fatih/color"
 )
 
 const usageError = 64            // incorrect usage of "pstore"
@@ -153,33 +152,36 @@ func GetParamsByPaths(sess *session.Session, input []string) []ParamResult {
 	results := []ParamResult{}
 	api := ssm.New(sess)
 	requestID := ""
-
 	for _, path := range input {
-		resp, err := api.GetParametersByPathWithContext(context.Background(), &ssm.GetParametersByPathInput{
+		input := &ssm.GetParametersByPathInput{
 			Path:           &path,
-			Recursive:      aws.Bool(false),
+			Recursive:      aws.Bool(true),
 			WithDecryption: aws.Bool(true),
-		}, func(r *request.Request) {
-			r.Handlers.Complete.PushBack(func(req *request.Request) {
-				requestID = req.RequestID
-			})
-		})
-
-		for _, param := range resp.Parameters {
-			parts := strings.Split(*param.Name, "/")
-			name := parts[len(parts)-1]
-			if err == nil {
-				results = append(results, ParamResult{
-					ParamName: "",
-					EnvName:   name,
-					Value:     *param.Value,
-					RequestID: requestID,
-					Success:   true,
-					Err:       nil,
-				})
-			}
 		}
+		api.GetParametersByPathPagesWithContext(
+			context.Background(),
+			input,
+			func(page *ssm.GetParametersByPathOutput, lastPage bool) bool {
+				for _, param := range page.Parameters {
+					parts := strings.Split(*param.Name, "/")
+					name := parts[len(parts)-1]
+					results = append(results, ParamResult{
+						ParamName: "",
+						EnvName:   name,
+						Value:     *param.Value,
+						RequestID: requestID,
+						Success:   true,
+						Err:       nil,
+					})
+				}
+				return !lastPage
+			},
+			func(r *request.Request) {
+				r.Handlers.Complete.PushBack(func(req *request.Request) {
+					requestID = req.RequestID
+				})
 
+			})
 	}
 
 	return results
