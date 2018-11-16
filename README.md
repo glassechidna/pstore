@@ -6,7 +6,11 @@
 absolute breeze. Simply prefix your application launch with `pstore exec <yourapp>`
 and you're up and running - in dev or prod.
 
+**AWS ECS now has [support for specifying secrets from Parameter Store directly
+in ECS task definitions][ecs-pstore], making `pstore` obsolete for some use cases.**
+
 [aws-pstore]: https://aws.amazon.com/ec2/systems-manager/parameter-store/
+[ecs-pstore]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/specifying-sensitive-data.html
 
 ## Usage
 
