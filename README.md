@@ -56,6 +56,16 @@ Invoke-Expression $Cmd
 Do-SomethingWith -DbString $DBSTRING
 ```
 
+### `show`
+
+Quickly interrogate parameters for a given path or path prefix:
+
+```
+$ pstore show "/company/princess/lambdas"
+/company/princess/lambdas/execution/env/MyDatabaseString : SomeSuperSecretDbString
+/company/princess/lambdas/execution/env/NODE_ENV         : production
+/company/princess/lambdas/execution/env/LOGLEVEL         : excessive
+```
 
 
 ## Advanced
